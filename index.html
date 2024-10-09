@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Nordhjem Manual Builder</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Include marked.js for Markdown conversion -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Include html2canvas for image capture -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Include jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Nordhjem Manual Builder</h1>
+        <div class="builder">
+            <div class="input-section">
+                <h2>Markdown Input</h2>
+                <!-- Markdown Drop Zone -->
+                <div id="markdown-dropzone" class="dropzone">
+                    <p>Drag and drop your Markdown file here or use the editor below.</p>
+                    <textarea id="markdown-input" placeholder="Paste your markdown here..."></textarea>
+                </div>
+            </div>
+            <div class="options-section">
+                <h2>Background Images</h2>
+                <!-- Image Drop Zone -->
+                <div id="image-dropzone" class="dropzone">
+                    <p>Drag and drop background images here or click to select files.</p>
+                    <input type="file" id="bg-images" accept="image/png, image/jpeg" multiple style="display: none;">
+                    <button id="select-images-btn">Select Images</button>
+                </div>
+                <div id="image-preview" class="image-preview"></div>
+                
+                <h3>Overlay Options</h3>
+                <label>
+                    <input type="checkbox" id="enable-shadow" checked>
+                    Text Shadow
+                </label>
+                <label>
+                    Shadow Color:
+                    <input type="color" id="shadow-color" value="#000000">
+                </label>
+                <!-- Removed Shadow Opacity Slider -->
+                <label>
+                    Shadow Spread (px):
+                    <input type="number" id="shadow-spread" min="0" max="10" value="4" readonly>
+                </label>
+                <label>
+                    <input type="checkbox" id="enable-overlay">
+                    Transparent Black Overlay
+                </label>
+                <label>
+                    Opacity:
+                    <input type="range" id="overlay-opacity" min="0" max="1" step="0.1" value="0.5">
+                </label>
+                
+                <h3>Text Options</h3>
+                <label>
+                    Text Color:
+                    <input type="color" id="text-color" value="#FFFFFF">
+                </label>
+                <label>
+                    Font Size:
+                    <input type="number" id="font-size" min="10" max="36" value="16"> px
+                </label>
+                <label>
+                    Font Family:
+                    <select id="font-family">
+                        <option value="'Cinzel', serif">Cinzel</option>
+                        <option value="'Roboto', sans-serif">Roboto</option>
+                        <option value="'Open Sans', sans-serif">Open Sans</option>
+                        <option value="'Times New Roman', serif">Times New Roman</option>
+                        <!-- Add more fonts as needed -->
+                    </select>
+                </label>
+                <label>
+                    Line Spacing:
+                    <input type="range" id="line-spacing" min="1" max="2" step="0.1" value="1.5">
+                </label>
+                
+                <h3>Link Color</h3>
+                <input type="color" id="link-color" value="#FFFFFF">
+            </div>
+        </div>
+        <div class="button-group">
+            <button id="generate-btn">Generate Manual</button>
+        </div>
+        <div id="preview-container">
+            <h2>Preview</h2>
+            <div class="preview-navigation">
+                <button id="prev-page" disabled>&larr;</button>
+                <span id="current-page">Cover Page of X</span>
+                <button id="next-page" disabled>&rarr;</button>
+            </div>
+            <div id="manual-preview" class="manual-preview"></div>
+        </div>
+        <div class="download-buttons">
+            <button id="download-images-btn">Download Pages as Images</button>
+            <button id="download-pdf-btn">Download as PDF</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
