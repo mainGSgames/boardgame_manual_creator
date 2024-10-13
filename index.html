@@ -24,36 +24,37 @@
                 </div>
             </div>
             <div class="options-section">
+                <h2>Cover Image</h2>
+                <!-- Cover Image Drop Zone -->
+                <div id="cover-image-dropzone" class="dropzone">
+                    <p>Drag and drop the cover image here or click to select a file.</p>
+                    <input type="file" id="cover-image-input" accept="image/png, image/jpeg" style="display: none;">
+                    <button id="select-cover-image-btn">Select Cover Image</button>
+                </div>
+                <div id="cover-image-preview" class="image-preview"></div>
+                
                 <h2>Background Images</h2>
-                <!-- Image Drop Zone -->
-                <div id="image-dropzone" class="dropzone">
+                <!-- Background Images Drop Zone -->
+                <div id="bg-image-dropzone" class="dropzone">
                     <p>Drag and drop background images here or click to select files.</p>
                     <input type="file" id="bg-images" accept="image/png, image/jpeg" multiple style="display: none;">
-                    <button id="select-images-btn">Select Images</button>
+                    <button id="select-bg-images-btn">Select Background Images</button>
                 </div>
-                <div id="image-preview" class="image-preview"></div>
+                <div id="bg-image-preview" class="image-preview sortable"></div>
+                
+                <h2>Frame Image (Optional)</h2>
+                <!-- Frame Image Drop Zone -->
+                <div id="frame-image-dropzone" class="dropzone">
+                    <p>Drag and drop a frame image here or click to select a file.</p>
+                    <input type="file" id="frame-image-input" accept="image/png" style="display: none;">
+                    <button id="select-frame-image-btn">Select Frame Image</button>
+                </div>
+                <div id="frame-image-preview" class="image-preview"></div>
                 
                 <h3>Overlay Options</h3>
                 <label>
-                    <input type="checkbox" id="enable-shadow" checked>
-                    Text Shadow
-                </label>
-                <label>
-                    Shadow Color:
-                    <input type="color" id="shadow-color" value="#000000">
-                </label>
-                <!-- Removed Shadow Opacity Slider -->
-                <label>
-                    Shadow Spread (px):
-                    <input type="number" id="shadow-spread" min="0" max="10" value="4" readonly>
-                </label>
-                <label>
-                    <input type="checkbox" id="enable-overlay">
-                    Transparent Black Overlay
-                </label>
-                <label>
                     Opacity:
-                    <input type="range" id="overlay-opacity" min="0" max="1" step="0.1" value="0.5">
+                    <input type="range" id="overlay-opacity" min="0.1" max="0.8" step="0.1" value="0.2">
                 </label>
                 
                 <h3>Text Options</h3>

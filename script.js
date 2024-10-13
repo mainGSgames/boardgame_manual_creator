@@ -1,31 +1,51 @@
 // script.js
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Markdown Input Elements
     const markdownInput = document.getElementById('markdown-input');
     const markdownDropzone = document.getElementById('markdown-dropzone');
+
+    // Cover Image Elements
+    const coverImageInput = document.getElementById('cover-image-input');
+    const coverImageDropzone = document.getElementById('cover-image-dropzone');
+    const selectCoverImageBtn = document.getElementById('select-cover-image-btn');
+    const coverImagePreview = document.getElementById('cover-image-preview');
+
+    // Background Images Elements
     const bgImagesInput = document.getElementById('bg-images');
-    const imageDropzone = document.getElementById('image-dropzone');
-    const selectImagesBtn = document.getElementById('select-images-btn');
-    const imagePreview = document.getElementById('image-preview');
-    const generateBtn = document.getElementById('generate-btn');
-    const manualPreview = document.getElementById('manual-preview');
-    const downloadImagesBtn = document.getElementById('download-images-btn');
-    const downloadPdfBtn = document.getElementById('download-pdf-btn');
-    const textColorInput = document.getElementById('text-color');
-    const shadowCheckbox = document.getElementById('enable-shadow');
-    const shadowColorInput = document.getElementById('shadow-color');
-    const shadowSpreadInput = document.getElementById('shadow-spread');
-    const overlayCheckbox = document.getElementById('enable-overlay');
+    const bgImageDropzone = document.getElementById('bg-image-dropzone');
+    const selectBgImagesBtn = document.getElementById('select-bg-images-btn');
+    const bgImagePreview = document.getElementById('bg-image-preview');
+
+    // Frame Image Elements
+    const frameImageInput = document.getElementById('frame-image-input');
+    const frameImageDropzone = document.getElementById('frame-image-dropzone');
+    const selectFrameImageBtn = document.getElementById('select-frame-image-btn');
+    const frameImagePreview = document.getElementById('frame-image-preview');
+
+    // Overlay Options
     const overlayOpacityInput = document.getElementById('overlay-opacity');
+
+    // Text Options
+    const textColorInput = document.getElementById('text-color');
     const fontSizeInput = document.getElementById('font-size');
     const fontFamilySelect = document.getElementById('font-family');
     const lineSpacingInput = document.getElementById('line-spacing');
     const linkColorInput = document.getElementById('link-color');
+
+    // Buttons
+    const generateBtn = document.getElementById('generate-btn');
+    const manualPreview = document.getElementById('manual-preview');
     const prevPageBtn = document.getElementById('prev-page');
     const nextPageBtn = document.getElementById('next-page');
     const currentPageSpan = document.getElementById('current-page');
+    const downloadImagesBtn = document.getElementById('download-images-btn');
+    const downloadPdfBtn = document.getElementById('download-pdf-btn');
 
-    let backgroundImages = [];
+    // Data Variables
+    let coverImage = null; // Single image
+    let backgroundImages = []; // Array of images
+    let frameImage = null; // Single image
     let pages = [];
     let currentPageIndex = 0;
 
@@ -34,27 +54,31 @@ document.addEventListener('DOMContentLoaded', () => {
         const elements = [
             markdownInput,
             markdownDropzone,
+            coverImageInput,
+            coverImageDropzone,
+            selectCoverImageBtn,
+            coverImagePreview,
             bgImagesInput,
-            imageDropzone,
-            selectImagesBtn,
-            imagePreview,
-            generateBtn,
-            manualPreview,
-            downloadImagesBtn,
-            downloadPdfBtn,
-            textColorInput,
-            shadowCheckbox,
-            shadowColorInput,
-            shadowSpreadInput,
-            overlayCheckbox,
+            bgImageDropzone,
+            selectBgImagesBtn,
+            bgImagePreview,
+            frameImageInput,
+            frameImageDropzone,
+            selectFrameImageBtn,
+            frameImagePreview,
             overlayOpacityInput,
+            textColorInput,
             fontSizeInput,
             fontFamilySelect,
             lineSpacingInput,
             linkColorInput,
+            generateBtn,
+            manualPreview,
             prevPageBtn,
             nextPageBtn,
-            currentPageSpan
+            currentPageSpan,
+            downloadImagesBtn,
+            downloadPdfBtn
         ];
 
         elements.forEach(elem => {
@@ -96,37 +120,95 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Handle Image Drop Zone
-    imageDropzone.addEventListener('dragover', (event) => {
+    // Handle Cover Image Drop Zone
+    coverImageDropzone.addEventListener('dragover', (event) => {
         event.preventDefault();
-        imageDropzone.classList.add('dragover');
+        coverImageDropzone.classList.add('dragover');
     });
 
-    imageDropzone.addEventListener('dragleave', (event) => {
+    coverImageDropzone.addEventListener('dragleave', (event) => {
         event.preventDefault();
-        imageDropzone.classList.remove('dragover');
+        coverImageDropzone.classList.remove('dragover');
     });
 
-    imageDropzone.addEventListener('drop', (event) => {
+    coverImageDropzone.addEventListener('drop', (event) => {
         event.preventDefault();
-        imageDropzone.classList.remove('dragover');
+        coverImageDropzone.classList.remove('dragover');
         const files = event.dataTransfer.files;
-        handleImageFiles(files);
+        if (files.length > 0) {
+            const file = files[0];
+            if (file.type.startsWith('image/')) {
+                handleCoverImageFile(file);
+            } else {
+                alert('Only image files (PNG, JPEG) are allowed for cover image.');
+            }
+        }
     });
 
-    // Handle Select Images Button Click
-    selectImagesBtn.addEventListener('click', () => {
+    // Handle Select Cover Image Button Click
+    selectCoverImageBtn.addEventListener('click', () => {
+        coverImageInput.click();
+    });
+
+    // Handle Cover Image Upload via File Input
+    coverImageInput.addEventListener('change', (event) => {
+        const files = event.target.files;
+        if (files.length > 0) {
+            const file = files[0];
+            if (file.type.startsWith('image/')) {
+                handleCoverImageFile(file);
+            } else {
+                alert('Only image files (PNG, JPEG) are allowed for cover image.');
+            }
+        }
+    });
+
+    // Function to handle cover image file
+    function handleCoverImageFile(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                const croppedDataUrl = cropImageToA4(img);
+                coverImage = croppedDataUrl;
+                displayImagePreview(coverImagePreview, croppedDataUrl);
+            }
+            img.src = e.target.result;
+        }
+        reader.readAsDataURL(file);
+    }
+
+    // Handle Background Images Drop Zone
+    bgImageDropzone.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        bgImageDropzone.classList.add('dragover');
+    });
+
+    bgImageDropzone.addEventListener('dragleave', (event) => {
+        event.preventDefault();
+        bgImageDropzone.classList.remove('dragover');
+    });
+
+    bgImageDropzone.addEventListener('drop', (event) => {
+        event.preventDefault();
+        bgImageDropzone.classList.remove('dragover');
+        const files = event.dataTransfer.files;
+        handleBgImageFiles(files);
+    });
+
+    // Handle Select Background Images Button Click
+    selectBgImagesBtn.addEventListener('click', () => {
         bgImagesInput.click();
     });
 
-    // Handle Background Image Upload via File Input
+    // Handle Background Images Upload via File Input
     bgImagesInput.addEventListener('change', (event) => {
         const files = event.target.files;
-        handleImageFiles(files);
+        handleBgImageFiles(files);
     });
 
-    // Function to handle image files with cropping to A4 aspect ratio
-    function handleImageFiles(files) {
+    // Function to handle background image files with cropping to A4 aspect ratio
+    function handleBgImageFiles(files) {
         for (let file of files) {
             if (file.type.startsWith('image/')) {
                 const reader = new FileReader();
@@ -134,19 +216,144 @@ document.addEventListener('DOMContentLoaded', () => {
                     const img = new Image();
                     img.onload = () => {
                         const croppedDataUrl = cropImageToA4(img);
-                        const croppedImg = document.createElement('img');
-                        croppedImg.src = croppedDataUrl;
-                        croppedImg.title = `Image ${backgroundImages.length + 1}`;
-                        imagePreview.appendChild(croppedImg);
                         backgroundImages.push(croppedDataUrl);
+                        displayImagePreview(bgImagePreview, croppedDataUrl, true); // sortable = true
                     }
                     img.src = e.target.result;
                 }
                 reader.readAsDataURL(file);
             } else {
-                alert('Only image files (PNG, JPEG) are allowed.');
+                alert('Only image files (PNG, JPEG) are allowed for background images.');
             }
         }
+    }
+
+    // Handle Frame Image Drop Zone
+    frameImageDropzone.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        frameImageDropzone.classList.add('dragover');
+    });
+
+    frameImageDropzone.addEventListener('dragleave', (event) => {
+        event.preventDefault();
+        frameImageDropzone.classList.remove('dragover');
+    });
+
+    frameImageDropzone.addEventListener('drop', (event) => {
+        event.preventDefault();
+        frameImageDropzone.classList.remove('dragover');
+        const files = event.dataTransfer.files;
+        if (files.length > 0) {
+            const file = files[0];
+            if (file.type === 'image/png') {
+                handleFrameImageFile(file);
+            } else {
+                alert('Only PNG image files are allowed for frame image.');
+            }
+        }
+    });
+
+    // Handle Select Frame Image Button Click
+    selectFrameImageBtn.addEventListener('click', () => {
+        frameImageInput.click();
+    });
+
+    // Handle Frame Image Upload via File Input
+    frameImageInput.addEventListener('change', (event) => {
+        const files = event.target.files;
+        if (files.length > 0) {
+            const file = files[0];
+            if (file.type === 'image/png') {
+                handleFrameImageFile(file);
+            } else {
+                alert('Only PNG image files are allowed for frame image.');
+            }
+        }
+    });
+
+    // Function to handle frame image file
+    function handleFrameImageFile(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                // No cropping for frame image
+                frameImage = e.target.result;
+                displayImagePreview(frameImagePreview, frameImage);
+            }
+            img.src = e.target.result;
+        }
+        reader.readAsDataURL(file);
+    }
+
+    // Function to display image preview
+    function displayImagePreview(previewContainer, dataUrl, isSortable = false) {
+        if (isSortable) {
+            // For sortable background images, append multiple images
+            const img = document.createElement('img');
+            img.src = dataUrl;
+            img.draggable = true;
+            // Implement drag and drop for reordering
+            img.addEventListener('dragstart', handleDragStart);
+            img.addEventListener('dragover', handleDragOver);
+            img.addEventListener('drop', handleDrop);
+            img.addEventListener('dragend', handleDragEnd);
+            previewContainer.appendChild(img);
+        } else {
+            // For single images like cover and frame, replace existing preview
+            previewContainer.innerHTML = ''; // Clear previous previews
+            const img = document.createElement('img');
+            img.src = dataUrl;
+            previewContainer.appendChild(img);
+        }
+    }
+
+    // Drag and Drop Reordering Handlers for Background Images
+    let dragSrcEl = null;
+
+    function handleDragStart(e) {
+        dragSrcEl = this;
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', this.outerHTML);
+        this.classList.add('dragging');
+    }
+
+    function handleDragOver(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        return false;
+    }
+
+    function handleDrop(e) {
+        e.stopPropagation();
+        if (dragSrcEl !== this) {
+            // Replace the dropped element with the dragged one
+            dragSrcEl.outerHTML = this.outerHTML;
+            this.outerHTML = e.dataTransfer.getData('text/html');
+
+            // Reattach event listeners
+            initializeSortable();
+
+            // Update backgroundImages array based on new order
+            const srcs = Array.from(bgImagePreview.querySelectorAll('img')).map(img => img.src);
+            backgroundImages = srcs;
+        }
+        return false;
+    }
+
+    function handleDragEnd(e) {
+        this.classList.remove('dragging');
+    }
+
+    // Initialize drag and drop handlers for existing images
+    function initializeSortable() {
+        const imgs = bgImagePreview.querySelectorAll('img');
+        imgs.forEach(img => {
+            img.addEventListener('dragstart', handleDragStart);
+            img.addEventListener('dragover', handleDragOver);
+            img.addEventListener('drop', handleDrop);
+            img.addEventListener('dragend', handleDragEnd);
+        });
     }
 
     // Function to crop image to A4 aspect ratio (210mm x 297mm) at 96 DPI (794x1123px)
@@ -192,59 +399,64 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Check if no images are uploaded; if so, use a single black background
+        if (!coverImage) {
+            alert('Please upload a cover image.');
+            return;
+        }
+
+        // Check if no background images are uploaded; if so, use a single black background
         if (backgroundImages.length === 0) {
             backgroundImages.push(null); // Using null to denote black background
         }
 
         // Split markdown into pages based on '---'
-        pages = markdownText.split(/^---$/m).map(page => page.trim()).filter(page => page.length > 0);
+        const markdownPages = markdownText.split(/^---$/m).map(page => page.trim()).filter(page => page.length > 0);
 
-        if (pages.length === 0) {
-            alert('No content found in markdown.');
-            return;
-        }
-
-        // Clear previous previews
-        manualPreview.innerHTML = '';
-        currentPageIndex = 0;
-
-        // Create page data with rotated background images
-        const pageData = pages.map((pageContent, index) => {
-            // Convert Markdown to HTML and remove {#...} tags
-            const cleanContent = pageContent.replace(/\s*\{#.*?\}/g, '');
-            const htmlContent = marked.parse(cleanContent);
-
+        // Assign background images to content pages
+        // If fewer background images than pages, rotate or use last image
+        const contentPages = markdownPages.map((pageContent, index) => {
             return {
-                content: htmlContent,
+                content: pageContent,
                 bgImage: backgroundImages[index % backgroundImages.length] // Rotate images or use null for black
             };
         });
 
+        // Combine cover page and content pages
+        pages = [
+            {
+                content: '', // No text on cover page
+                bgImage: coverImage
+            },
+            ...contentPages
+        ];
+
         // Render initial preview
-        renderPreviewPage(pageData, currentPageIndex);
+        renderPreviewPage(pages, currentPageIndex);
 
         // Enable navigation buttons if multiple pages
-        if (pageData.length > 1) {
+        if (pages.length > 1) {
             nextPageBtn.disabled = false;
+            prevPageBtn.disabled = true;
         } else {
             nextPageBtn.disabled = true;
+            prevPageBtn.disabled = true;
         }
 
         // Store pages globally for download functionality
-        manualPreview.dataset.pages = JSON.stringify(pageData);
+        manualPreview.dataset.pages = JSON.stringify(pages);
+        manualPreview.dataset.frameImage = frameImage || ''; // Store frame image
     });
 
     // Render a specific preview page
-    function renderPreviewPage(pageData, index) {
-        if (!pageData || index < 0 || index >= pageData.length) {
+    function renderPreviewPage(pages, index) {
+        if (!pages || index < 0 || index >= pages.length) {
             console.error('Invalid page data or index.');
             return;
         }
 
         manualPreview.innerHTML = ''; // Clear current preview
 
-        const page = pageData[index];
+        const page = pages[index];
 
         // Create page preview
         const pageDiv = document.createElement('div');
@@ -261,51 +473,70 @@ document.addEventListener('DOMContentLoaded', () => {
             pageDiv.style.backgroundColor = '#000000';
         }
 
-        // Create content div
-        const contentDiv = document.createElement('div');
-        contentDiv.classList.add('content');
-
-        // Apply dynamic styles
-        contentDiv.style.color = textColorInput.value;
-        contentDiv.style.fontSize = `${fontSizeInput.value}px`;
-        contentDiv.style.fontFamily = fontFamilySelect.value;
-        contentDiv.style.lineHeight = lineSpacingInput.value;
-
-        // Apply link color
-        contentDiv.style.setProperty('--link-color', linkColorInput.value);
-
-        // Handle shadow
-        if (shadowCheckbox.checked) {
-            const shadowColor = shadowColorInput.value;
-            const shadowSpread = shadowSpreadInput.value;
-            contentDiv.style.setProperty('--shadow-color', shadowColor);
-            contentDiv.style.setProperty('--shadow-spread', shadowSpread);
-            contentDiv.classList.add('shadow');
-        } else {
-            contentDiv.classList.remove('shadow');
+        // Create frame image if exists and not cover page
+        if (frameImage && index !== 0) {
+            const frameImg = document.createElement('img');
+            frameImg.src = frameImage;
+            frameImg.classList.add('frame');
+            pageDiv.appendChild(frameImg);
         }
 
-        // Handle overlay
-        if (overlayCheckbox.checked) {
-            const opacity = overlayOpacityInput.value;
-            contentDiv.style.setProperty('--overlay-opacity', opacity);
-            contentDiv.classList.add('overlay');
-        } else {
-            contentDiv.classList.remove('overlay');
+        // Create overlay div only for content pages (not cover page)
+        let overlayDiv = null;
+        if (index !== 0) {
+            overlayDiv = document.createElement('div');
+            overlayDiv.classList.add('overlay');
+            overlayDiv.style.position = 'absolute';
+            overlayDiv.style.top = '0';
+            overlayDiv.style.left = '0';
+            overlayDiv.style.width = '100%';
+            overlayDiv.style.height = '100%';
+            overlayDiv.style.backgroundColor = `rgba(0, 0, 0, ${overlayOpacityInput.value})`;
+            overlayDiv.style.zIndex = '1';
+            overlayDiv.style.borderRadius = '10px'; // Optional: Adjust as needed
+            pageDiv.appendChild(overlayDiv);
         }
 
-        // Set inner HTML
-        contentDiv.innerHTML = page.content;
+        // Create content div only if not cover page
+        if (index !== 0) {
+            const contentDiv = document.createElement('div');
+            contentDiv.classList.add('content');
 
-        // Replace link colors
-        const links = contentDiv.querySelectorAll('a');
-        links.forEach(link => {
-            link.style.color = linkColorInput.value;
-        });
+            // Apply dynamic styles
+            contentDiv.style.color = textColorInput.value;
+            contentDiv.style.fontSize = `${fontSizeInput.value}px`;
+            contentDiv.style.fontFamily = fontFamilySelect.value;
+            contentDiv.style.setProperty('--link-color', linkColorInput.value);
 
-        pageDiv.appendChild(contentDiv);
+            // Initial line spacing
+            let currentLineSpacing = parseFloat(lineSpacingInput.value);
+            contentDiv.style.lineHeight = currentLineSpacing;
 
-        // Add page number if not the first page
+            // Convert Markdown to HTML and remove {#...} tags
+            const cleanContent = page.content.replace(/\s*\{#.*?\}/g, '');
+            let htmlContent = marked.parse(cleanContent);
+
+            contentDiv.innerHTML = htmlContent;
+
+            // Replace link colors
+            const links = contentDiv.querySelectorAll('a');
+            links.forEach(link => {
+                link.style.color = linkColorInput.value;
+            });
+
+            // Handle shadow
+            const shadowColor = '#000000'; // Fixed shadow color (can be made configurable)
+            const shadowSpread = 4; // Fixed shadow spread (can be made configurable)
+            contentDiv.style.textShadow = `0px 0px ${shadowSpread}px rgba(0,0,0,1)`;
+
+            // Append content
+            pageDiv.appendChild(contentDiv);
+
+            // Adjust line spacing if necessary
+            adjustLineSpacing(contentDiv, currentLineSpacing, 1.2); // compressed line spacing 1.2
+        }
+
+        // Add page number if not cover page
         if (index > 0) {
             const pageNumberDiv = document.createElement('div');
             pageNumberDiv.classList.add('page-number');
@@ -318,7 +549,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Update current page display
         const displayPageNumber = index === 0 ? 'Cover Page' : `Page ${index}`;
-        currentPageSpan.textContent = `${displayPageNumber} of ${pageData.length}`;
+        currentPageSpan.textContent = `${displayPageNumber} of ${pages.length}`;
+    }
+
+    // Function to adjust line spacing based on content height
+    function adjustLineSpacing(contentDiv, currentLineSpacing, compressedLineSpacing) {
+        // Clone the content div to measure height
+        const clone = contentDiv.cloneNode(true);
+        clone.style.visibility = 'hidden';
+        clone.style.position = 'absolute';
+        clone.style.top = '0';
+        clone.style.left = '0';
+        clone.style.width = contentDiv.offsetWidth + 'px';
+        clone.style.lineHeight = currentLineSpacing;
+        document.body.appendChild(clone);
+
+        const contentHeight = clone.scrollHeight;
+        const pageContentHeight = contentDiv.offsetHeight;
+
+        // Remove the clone
+        document.body.removeChild(clone);
+
+        if (contentHeight > (pageContentHeight * (2 / 3))) {
+            // Apply compressed line spacing
+            contentDiv.style.lineHeight = compressedLineSpacing;
+        } else {
+            // Apply default line spacing
+            contentDiv.style.lineHeight = currentLineSpacing;
+        }
     }
 
     // Handle Next Page
@@ -350,13 +608,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle Download as Images
     downloadImagesBtn.addEventListener('click', async () => {
         const pageData = JSON.parse(manualPreview.dataset.pages || '[]');
+        const frameImg = manualPreview.dataset.frameImage;
         if (pageData.length === 0) {
             alert('Please generate the manual first.');
             return;
         }
 
         for (let i = 0; i < pageData.length; i++) {
-            await renderFullPage(pageData[i], i).then(canvas => {
+            await renderFullPage(pageData[i], i, frameImg).then(canvas => {
                 const link = document.createElement('a');
                 link.download = `page_${i + 1}.png`;
                 link.href = canvas.toDataURL('image/png');
@@ -373,6 +632,7 @@ document.addEventListener('DOMContentLoaded', () => {
     downloadPdfBtn.addEventListener('click', async () => {
         const { jsPDF } = window.jspdf;
         const pageData = JSON.parse(manualPreview.dataset.pages || '[]');
+        const frameImg = manualPreview.dataset.frameImage;
         if (pageData.length === 0) {
             alert('Please generate the manual first.');
             return;
@@ -381,7 +641,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const pdf = new jsPDF('p', 'mm', 'a4');
 
         for (let i = 0; i < pageData.length; i++) {
-            await renderFullPage(pageData[i], i).then(canvas => {
+            await renderFullPage(pageData[i], i, frameImg).then(canvas => {
                 const imgData = canvas.toDataURL('image/png');
                 if (i > 0) {
                     pdf.addPage();
@@ -396,7 +656,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Helper function to render a full page and return canvas
-    function renderFullPage(page, index) {
+    function renderFullPage(page, index, frameImg) {
         return new Promise((resolve, reject) => {
             const tempDiv = document.createElement('div');
             tempDiv.classList.add('page-preview');
@@ -412,51 +672,70 @@ document.addEventListener('DOMContentLoaded', () => {
                 tempDiv.style.backgroundColor = '#000000';
             }
 
-            // Create content div
-            const contentDiv = document.createElement('div');
-            contentDiv.classList.add('content');
-
-            // Apply dynamic styles
-            contentDiv.style.color = textColorInput.value;
-            contentDiv.style.fontSize = `${fontSizeInput.value}px`;
-            contentDiv.style.fontFamily = fontFamilySelect.value;
-            contentDiv.style.lineHeight = lineSpacingInput.value;
-
-            // Apply link color
-            contentDiv.style.setProperty('--link-color', linkColorInput.value);
-
-            // Handle shadow
-            if (shadowCheckbox.checked) {
-                const shadowColor = shadowColorInput.value;
-                const shadowSpread = shadowSpreadInput.value;
-                contentDiv.style.setProperty('--shadow-color', shadowColor);
-                contentDiv.style.setProperty('--shadow-spread', shadowSpread);
-                contentDiv.classList.add('shadow');
-            } else {
-                contentDiv.classList.remove('shadow');
+            // Create frame image if exists and not cover page
+            if (frameImg && index !== 0) {
+                const frameImageElem = document.createElement('img');
+                frameImageElem.src = frameImg;
+                frameImageElem.classList.add('frame');
+                tempDiv.appendChild(frameImageElem);
             }
 
-            // Handle overlay
-            if (overlayCheckbox.checked) {
-                const opacity = overlayOpacityInput.value;
-                contentDiv.style.setProperty('--overlay-opacity', opacity);
-                contentDiv.classList.add('overlay');
-            } else {
-                contentDiv.classList.remove('overlay');
+            // Create overlay div only for content pages (not cover page)
+            let overlayDiv = null;
+            if (index !== 0) {
+                overlayDiv = document.createElement('div');
+                overlayDiv.classList.add('overlay');
+                overlayDiv.style.position = 'absolute';
+                overlayDiv.style.top = '0';
+                overlayDiv.style.left = '0';
+                overlayDiv.style.width = '100%';
+                overlayDiv.style.height = '100%';
+                overlayDiv.style.backgroundColor = `rgba(0, 0, 0, ${overlayOpacityInput.value})`;
+                overlayDiv.style.zIndex = '1';
+                overlayDiv.style.borderRadius = '10px'; // Optional: Adjust as needed
+                tempDiv.appendChild(overlayDiv);
             }
 
-            // Set inner HTML
-            contentDiv.innerHTML = page.content;
+            // Create content div only if not cover page
+            if (index !== 0) {
+                const contentDiv = document.createElement('div');
+                contentDiv.classList.add('content');
 
-            // Replace link colors
-            const links = contentDiv.querySelectorAll('a');
-            links.forEach(link => {
-                link.style.color = linkColorInput.value;
-            });
+                // Apply dynamic styles
+                contentDiv.style.color = textColorInput.value;
+                contentDiv.style.fontSize = `${fontSizeInput.value}px`;
+                contentDiv.style.fontFamily = fontFamilySelect.value;
+                contentDiv.style.setProperty('--link-color', linkColorInput.value);
 
-            tempDiv.appendChild(contentDiv);
+                // Initial line spacing
+                let currentLineSpacing = parseFloat(lineSpacingInput.value);
+                contentDiv.style.lineHeight = currentLineSpacing;
 
-            // Add page number if not the first page
+                // Convert Markdown to HTML and remove {#...} tags
+                const cleanContent = page.content.replace(/\s*\{#.*?\}/g, '');
+                let htmlContent = marked.parse(cleanContent);
+
+                contentDiv.innerHTML = htmlContent;
+
+                // Replace link colors
+                const links = contentDiv.querySelectorAll('a');
+                links.forEach(link => {
+                    link.style.color = linkColorInput.value;
+                });
+
+                // Handle shadow
+                const shadowColor = '#000000'; // Fixed shadow color (can be made configurable)
+                const shadowSpread = 4; // Fixed shadow spread (can be made configurable)
+                contentDiv.style.textShadow = `0px 0px ${shadowSpread}px rgba(0,0,0,1)`;
+
+                // Append content
+                tempDiv.appendChild(contentDiv);
+
+                // Adjust line spacing if necessary
+                adjustLineSpacing(contentDiv, currentLineSpacing, 1.2); // compressed line spacing 1.2
+            }
+
+            // Add page number if not cover page
             if (index > 0) {
                 const pageNumberDiv = document.createElement('div');
                 pageNumberDiv.classList.add('page-number');
@@ -477,4 +756,5 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
+
 });

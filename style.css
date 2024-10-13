@@ -74,7 +74,9 @@ textarea {
     background-color: #4a5a73;
 }
 
-#select-images-btn {
+#select-cover-image-btn,
+#select-bg-images-btn,
+#select-frame-image-btn {
     margin-top: 10px;
     padding: 10px 20px;
     background-color: #2980b9;
@@ -85,11 +87,15 @@ textarea {
     transition: background-color 0.3s ease;
 }
 
-#select-images-btn:hover {
+#select-cover-image-btn:hover,
+#select-bg-images-btn:hover,
+#select-frame-image-btn:hover {
     background-color: #1f6391;
 }
 
-#bg-images {
+#cover-image-input,
+#bg-images,
+#frame-image-input {
     display: none; /* Hidden, triggered by button */
 }
 
@@ -108,6 +114,13 @@ textarea {
     object-fit: cover;
     border: 2px solid #7f8c8d;
     border-radius: 5px;
+    cursor: move; /* Indicate draggable for reordering */
+}
+
+.image-preview.sortable {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 .options-section label {
@@ -207,22 +220,45 @@ button:hover {
     z-index: 1;
 }
 
+.page-preview img.frame {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Frame should be on top */
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 3; /* Above content */
+    pointer-events: none; /* Allow clicks to pass through */
+}
+
 .page-preview .content {
+    position: absolute;
+    top: 50px; /* Margin from top */
+    left: 50px; /* Margin from left */
+    width: calc(100% - 100px); /* Adjust width based on margins */
+    height: calc(100% - 100px); /* Adjust height based on margins */
+    padding: 20px;
+    box-sizing: border-box;
+    z-index: 2; /* Positioned above the overlay */
+    overflow: hidden;
+    /* Removed background-color to allow overlay to darken the page */
+    color: inherit;
+    font-size: inherit;
+    font-family: inherit;
+    text-align: left;
+    line-height: var(--line-spacing, 1.5);
+    border-radius: 10px; /* Optional: keep or adjust as needed */
+}
+
+.page-preview .overlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    padding: 20mm;
-    box-sizing: border-box;
-    z-index: 2;
-    overflow: auto;
-    /* Default text color */
-    color: inherit;
-    font-size: inherit;
-    font-family: inherit;
-    text-align: left; /* Default alignment */
-    line-height: var(--line-spacing, 1.5); /* Dynamic line spacing */
+    background-color: rgba(0, 0, 0, var(--overlay-opacity, 0.2)); /* Dynamic opacity */
+    z-index: 1; /* Positioned below the content */
+    pointer-events: none; /* Allows clicks to pass through */
 }
 
 .page-preview .content h1,
@@ -237,17 +273,6 @@ button:hover {
         0px 0px 4px rgba(0, 0, 0, 1),
         0px 0px 4px rgba(0, 0, 0, 1),
         0px 0px 4px rgba(0, 0, 0, 1);
-}
-
-.page-preview .content.overlay::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0, var(--overlay-opacity, 0.5)); /* Dynamic opacity */
-    z-index: -1;
 }
 
 .page-preview .content a {
