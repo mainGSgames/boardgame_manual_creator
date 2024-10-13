@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentPageSpan = document.getElementById('current-page');
     const downloadImagesBtn = document.getElementById('download-images-btn');
     const downloadPdfBtn = document.getElementById('download-pdf-btn');
+    const downloadOptimizedPdfBtn = document.getElementById('download-optimized-pdf-btn'); // New Button
 
     // Data Variables
     let coverImage = null; // Single image
@@ -78,7 +79,8 @@ document.addEventListener('DOMContentLoaded', () => {
             nextPageBtn,
             currentPageSpan,
             downloadImagesBtn,
-            downloadPdfBtn
+            downloadPdfBtn,
+            downloadOptimizedPdfBtn // Validate new button
         ];
 
         elements.forEach(elem => {
@@ -430,6 +432,9 @@ document.addEventListener('DOMContentLoaded', () => {
             ...contentPages
         ];
 
+        // Reset current page index
+        currentPageIndex = 0;
+
         // Render initial preview
         renderPreviewPage(pages, currentPageIndex);
 
@@ -486,14 +491,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (index !== 0) {
             overlayDiv = document.createElement('div');
             overlayDiv.classList.add('overlay');
-            overlayDiv.style.position = 'absolute';
-            overlayDiv.style.top = '0';
-            overlayDiv.style.left = '0';
-            overlayDiv.style.width = '100%';
-            overlayDiv.style.height = '100%';
             overlayDiv.style.backgroundColor = `rgba(0, 0, 0, ${overlayOpacityInput.value})`;
-            overlayDiv.style.zIndex = '1';
-            overlayDiv.style.borderRadius = '10px'; // Optional: Adjust as needed
             pageDiv.appendChild(overlayDiv);
         }
 
@@ -507,10 +505,7 @@ document.addEventListener('DOMContentLoaded', () => {
             contentDiv.style.fontSize = `${fontSizeInput.value}px`;
             contentDiv.style.fontFamily = fontFamilySelect.value;
             contentDiv.style.setProperty('--link-color', linkColorInput.value);
-
-            // Initial line spacing
-            let currentLineSpacing = parseFloat(lineSpacingInput.value);
-            contentDiv.style.lineHeight = currentLineSpacing;
+            contentDiv.style.lineHeight = `${lineSpacingInput.value}`;
 
             // Convert Markdown to HTML and remove {#...} tags
             const cleanContent = page.content.replace(/\s*\{#.*?\}/g, '');
@@ -525,7 +520,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             // Handle shadow
-            const shadowColor = '#000000'; // Fixed shadow color (can be made configurable)
             const shadowSpread = 4; // Fixed shadow spread (can be made configurable)
             contentDiv.style.textShadow = `0px 0px ${shadowSpread}px rgba(0,0,0,1)`;
 
@@ -533,7 +527,7 @@ document.addEventListener('DOMContentLoaded', () => {
             pageDiv.appendChild(contentDiv);
 
             // Adjust line spacing if necessary
-            adjustLineSpacing(contentDiv, currentLineSpacing, 1.2); // compressed line spacing 1.2
+            adjustLineSpacing(contentDiv, parseFloat(lineSpacingInput.value), 1.2); // compressed line spacing 1.2
         }
 
         // Add page number if not cover page
@@ -655,6 +649,33 @@ document.addEventListener('DOMContentLoaded', () => {
         pdf.save('manual.pdf');
     });
 
+    // Handle Download as Optimized PDF (New Functionality)
+    downloadOptimizedPdfBtn.addEventListener('click', async () => {
+        const { jsPDF } = window.jspdf;
+        const pageData = JSON.parse(manualPreview.dataset.pages || '[]');
+        const frameImg = manualPreview.dataset.frameImage;
+        if (pageData.length === 0) {
+            alert('Please generate the manual first.');
+            return;
+        }
+
+        const pdf = new jsPDF('p', 'mm', 'a4');
+
+        for (let i = 0; i < pageData.length; i++) {
+            await renderFullPage(pageData[i], i, frameImg).then(canvas => {
+                const imgData = canvas.toDataURL('image/jpeg', 0.6); // Use JPEG with 60% quality
+                if (i > 0) {
+                    pdf.addPage();
+                }
+                pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297); // A4 size in mm
+            }).catch(err => {
+                console.error('Error capturing page:', err);
+            });
+        }
+
+        pdf.save('manual_optimized.pdf');
+    });
+
     // Helper function to render a full page and return canvas
     function renderFullPage(page, index, frameImg) {
         return new Promise((resolve, reject) => {
@@ -681,18 +702,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Create overlay div only for content pages (not cover page)
-            let overlayDiv = null;
             if (index !== 0) {
-                overlayDiv = document.createElement('div');
+                const overlayDiv = document.createElement('div');
                 overlayDiv.classList.add('overlay');
-                overlayDiv.style.position = 'absolute';
-                overlayDiv.style.top = '0';
-                overlayDiv.style.left = '0';
-                overlayDiv.style.width = '100%';
-                overlayDiv.style.height = '100%';
                 overlayDiv.style.backgroundColor = `rgba(0, 0, 0, ${overlayOpacityInput.value})`;
-                overlayDiv.style.zIndex = '1';
-                overlayDiv.style.borderRadius = '10px'; // Optional: Adjust as needed
                 tempDiv.appendChild(overlayDiv);
             }
 
@@ -706,10 +719,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 contentDiv.style.fontSize = `${fontSizeInput.value}px`;
                 contentDiv.style.fontFamily = fontFamilySelect.value;
                 contentDiv.style.setProperty('--link-color', linkColorInput.value);
-
-                // Initial line spacing
-                let currentLineSpacing = parseFloat(lineSpacingInput.value);
-                contentDiv.style.lineHeight = currentLineSpacing;
+                contentDiv.style.lineHeight = `${lineSpacingInput.value}`;
 
                 // Convert Markdown to HTML and remove {#...} tags
                 const cleanContent = page.content.replace(/\s*\{#.*?\}/g, '');
@@ -724,7 +734,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 // Handle shadow
-                const shadowColor = '#000000'; // Fixed shadow color (can be made configurable)
                 const shadowSpread = 4; // Fixed shadow spread (can be made configurable)
                 contentDiv.style.textShadow = `0px 0px ${shadowSpread}px rgba(0,0,0,1)`;
 
@@ -732,7 +741,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 tempDiv.appendChild(contentDiv);
 
                 // Adjust line spacing if necessary
-                adjustLineSpacing(contentDiv, currentLineSpacing, 1.2); // compressed line spacing 1.2
+                adjustLineSpacing(contentDiv, parseFloat(lineSpacingInput.value), 1.2); // compressed line spacing 1.2
             }
 
             // Add page number if not cover page
@@ -748,6 +757,96 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Use html2canvas to capture the tempDiv
             html2canvas(tempDiv, { scale: 2 }).then(canvas => {
+                document.body.removeChild(tempDiv);
+                resolve(canvas);
+            }).catch(err => {
+                document.body.removeChild(tempDiv);
+                reject(err);
+            });
+        });
+    }
+
+    // Optimized Render Function for Lower Resolution and JPEG Compression
+    function renderFullPageOptimized(page, index, frameImg) {
+        return new Promise((resolve, reject) => {
+            const tempDiv = document.createElement('div');
+            tempDiv.classList.add('page-preview');
+
+            // Set background image or fallback to black
+            if (page.bgImage) {
+                const bgImg = document.createElement('img');
+                bgImg.src = page.bgImage;
+                bgImg.classList.add('background');
+                tempDiv.appendChild(bgImg);
+            } else {
+                // If no background image, ensure background is black
+                tempDiv.style.backgroundColor = '#000000';
+            }
+
+            // Create frame image if exists and not cover page
+            if (frameImg && index !== 0) {
+                const frameImageElem = document.createElement('img');
+                frameImageElem.src = frameImg;
+                frameImageElem.classList.add('frame');
+                tempDiv.appendChild(frameImageElem);
+            }
+
+            // Create overlay div only for content pages (not cover page)
+            if (index !== 0) {
+                const overlayDiv = document.createElement('div');
+                overlayDiv.classList.add('overlay');
+                overlayDiv.style.backgroundColor = `rgba(0, 0, 0, ${overlayOpacityInput.value})`;
+                tempDiv.appendChild(overlayDiv);
+            }
+
+            // Create content div only if not cover page
+            if (index !== 0) {
+                const contentDiv = document.createElement('div');
+                contentDiv.classList.add('content');
+
+                // Apply dynamic styles
+                contentDiv.style.color = textColorInput.value;
+                contentDiv.style.fontSize = `${fontSizeInput.value}px`;
+                contentDiv.style.fontFamily = fontFamilySelect.value;
+                contentDiv.style.setProperty('--link-color', linkColorInput.value);
+                contentDiv.style.lineHeight = `${lineSpacingInput.value}`;
+
+                // Convert Markdown to HTML and remove {#...} tags
+                const cleanContent = page.content.replace(/\s*\{#.*?\}/g, '');
+                let htmlContent = marked.parse(cleanContent);
+
+                contentDiv.innerHTML = htmlContent;
+
+                // Replace link colors
+                const links = contentDiv.querySelectorAll('a');
+                links.forEach(link => {
+                    link.style.color = linkColorInput.value;
+                });
+
+                // Handle shadow
+                const shadowSpread = 4; // Fixed shadow spread (can be made configurable)
+                contentDiv.style.textShadow = `0px 0px ${shadowSpread}px rgba(0,0,0,1)`;
+
+                // Append content
+                tempDiv.appendChild(contentDiv);
+
+                // Adjust line spacing if necessary
+                adjustLineSpacing(contentDiv, parseFloat(lineSpacingInput.value), 1.2); // compressed line spacing 1.2
+            }
+
+            // Add page number if not cover page
+            if (index > 0) {
+                const pageNumberDiv = document.createElement('div');
+                pageNumberDiv.classList.add('page-number');
+                pageNumberDiv.textContent = `Page ${index}`;
+                tempDiv.appendChild(pageNumberDiv);
+            }
+
+            // Append tempDiv to body temporarily for rendering
+            document.body.appendChild(tempDiv);
+
+            // Use html2canvas to capture the tempDiv at lower scale for optimized PDF
+            html2canvas(tempDiv, { scale: 1.5 }).then(canvas => {
                 document.body.removeChild(tempDiv);
                 resolve(canvas);
             }).catch(err => {

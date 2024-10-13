@@ -198,6 +198,14 @@ button:hover {
     margin-top: 20px;
 }
 
+.download-buttons button {
+    background-color: #27ae60; /* Changed to green for distinction */
+}
+
+.download-buttons button:hover {
+    background-color: #1e8449;
+}
+
 .page-preview {
     width: 794px; /* A4 width at 96 DPI */
     height: 1123px; /* A4 height at 96 DPI */
